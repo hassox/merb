@@ -797,6 +797,7 @@ require "merb-core/gem_ext/erubis"
 require "merb-core/logger"
 require "merb-core/version"
 require "merb-core/controller/mime"
+require 'merb-core/authorization/authorization'
 
 # Set the environment if it hasn't already been set.
 Merb.environment ||= ENV["MERB_ENV"] || Merb::Config[:environment] || (Merb.testing? ? "test" : "development")

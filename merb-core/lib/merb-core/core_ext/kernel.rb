@@ -486,4 +486,10 @@ module Kernel
     end
   end
   
+  # Authorization for merb.  See Merb::Authorization
+  # :api: public
+  def authorized?(user, verb, opts={})
+    Merb::Authorization.authorized?(user, verb, opts)
+  end
+  
 end

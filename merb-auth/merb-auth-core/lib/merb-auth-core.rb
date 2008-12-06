@@ -2,16 +2,16 @@
 
 require 'extlib'
 
-require 'merb-auth-core/authentication'
-require 'merb-auth-core/strategy'
-require 'merb-auth-core/session_mixin'
-require 'merb-auth-core/errors'
-require 'merb-auth-core/responses'
-require 'merb-auth-core/authenticated_helper'
-require 'merb-auth-core/customizations'
-require 'merb-auth-core/bootloader'
-require 'merb-auth-core/router_helper'
-require 'merb-auth-core/callbacks'
+require 'merb-auth-core/authentication/authentication'
+require 'merb-auth-core/authentication/strategy'
+require 'merb-auth-core/authentication/session_mixin'
+require 'merb-auth-core/authentication/errors'
+require 'merb-auth-core/authentication/responses'
+require 'merb-auth-core/authentication/authenticated_helper'
+require 'merb-auth-core/authentication/customizations'
+require 'merb-auth-core/authentication/bootloader'
+require 'merb-auth-core/authentication/router_helper'
+require 'merb-auth-core/authentication/callbacks'
 
 Merb::BootLoader.before_app_loads do
   # require code that must be loaded before the application 

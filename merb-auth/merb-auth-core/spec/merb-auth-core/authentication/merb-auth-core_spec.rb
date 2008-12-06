@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require File.join(File.dirname(__FILE__), "..", "..", 'spec_helper.rb')
 
 describe "merb-auth-core" do
   it "should ensure_authentication" do
