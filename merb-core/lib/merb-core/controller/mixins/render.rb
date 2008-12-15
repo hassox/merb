@@ -108,7 +108,8 @@ module Merb::RenderMixin
     thing ||= action_name.to_sym
 
     # Content negotiation
-    self.content_type = opts[:format] if opts[:format]
+    content_type
+    template_format = opts[:format] || content_type
 
     # Handle options (:status)
     _handle_options!(opts)
@@ -117,13 +118,13 @@ module Merb::RenderMixin
     if thing.is_a?(Symbol) || opts[:template]
 
       template_method, template_location = 
-        _template_for(thing, content_type, controller_name, opts[:template])
+        _template_for(thing, template_format, controller_name, opts[:template])
 
       # Raise an error if there's no template
       unless template_method && self.respond_to?(template_method)
         template_files = Merb::Template.template_extensions.map { |ext| "#{template_location}.#{ext}" }
         raise TemplateNotFound, "Oops! No template found. Merb was looking for #{template_files.join(', ')} " + 
-          "for content type '#{content_type}'. You might have mispelled the template or file name. " + 
+          "for content type '#{template_format}'. You might have mispelled the template or file name. " + 
           "Registered template extensions: #{Merb::Template.template_extensions.join(', ')}. " +
           "If you use Haml or some other template plugin, make sure you required Merb plugin dependency " + 
           "in your init file."
@@ -140,7 +141,7 @@ module Merb::RenderMixin
     end
 
     # If we find a layout, use it. Otherwise, just render the content thrown for layout.
-    (layout = _get_layout(opts[:layout])) ? send(layout) : catch_content(:for_layout)
+    (layout = _get_layout(opts[:layout], template_format)) ? send(layout) : catch_content(:for_layout)
   end
 
   # Renders an object using to registered transform method based on the
@@ -222,11 +223,12 @@ module Merb::RenderMixin
     # Merge with class level default render options
     # @todo can we find a way to refactor this out so we don't have to do it everywhere?
     opts = self.class.default_render_options.merge(opts)
+    template_format = opts[:format] || content_type
 
     # Figure out what to transform and raise NotAcceptable unless there's a transform method assigned
-    transform = Merb.mime_transform_method(content_type)
+    transform = Merb.mime_transform_method(template_format)
     if !transform
-      raise NotAcceptable, "#{e.message} and there was no transform method registered for #{content_type.inspect}"
+      raise NotAcceptable, "#{e.message} and there was no transform method registered for #{template_format.inspect}"
     elsif !object.respond_to?(transform)
       raise NotAcceptable, "#{e.message} and your object does not respond to ##{transform}"
     end
@@ -235,7 +237,7 @@ module Merb::RenderMixin
     _handle_options!(opts)
     throw_content(:for_layout, opts.empty? ? object.send(transform) : object.send(transform, opts))
     
-    meth, _ = _template_for(layout_opt, layout_opt.to_s.index(".") ? nil : content_type, "layout") if layout_opt
+    meth, _ = _get_layout(layout_opt, template_format)
     meth ? send(meth) : catch_content(:for_layout)
   end
 
@@ -366,24 +368,25 @@ module Merb::RenderMixin
   #   layout was specified, and the default layouts were not found.
   #
   # :api: private
-  def _get_layout(layout = nil)
+  def _get_layout(layout = nil, layout_format = nil)
     return false if layout == false
+    layout_format ||= content_type
     
     layout = layout.instance_of?(Symbol) && self.respond_to?(layout, true) ? send(layout) : layout
-    layout = layout.to_s if layout
+    layout = layout.to_s if layout    
 
     # If a layout was provided, throw an error if it's not found
     if layout      
       template_method, template_location = 
-        _template_for(layout, layout.index(".") ? nil : content_type, "layout")
+        _template_for(layout, layout.index(".") ? nil : layout_format, "layout")
         
       raise TemplateNotFound, "No layout found at #{template_location}" unless template_method
       template_method
 
     # If a layout was not provided, try the default locations
-    else
-      template, location = _template_for(controller_name, content_type, "layout")
-      template, location = _template_for("application", content_type, "layout") unless template
+    else      
+      template, location = _template_for(controller_name, layout_format, "layout")       
+      template, location = _template_for("application", layout_format, "layout") unless template
       template
     end
   end
