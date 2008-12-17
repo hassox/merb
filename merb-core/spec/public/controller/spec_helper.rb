@@ -14,7 +14,6 @@ require File.join(__DIR__, "controllers", "cookies")
 require File.join(__DIR__, "controllers", "conditional_get")
 require File.join(__DIR__, "controllers", "streaming")
 require File.join(__DIR__, "controllers", "nested_render")
-require File.join(__DIR__, "controllers", "exceptions")
 
 Merb.add_mime_type :html1, :to_html1, ["text/html"]
 Merb.add_mime_type :html2, :to_html2, ["text/html"]
